@@ -7,6 +7,10 @@
       url = "github:caniko/harbor-meta/b494b56e8174557b27956108d3ed7dd0e6425d0b";
       flake = false;
     };
+    treefmt-nix = {
+      url = "github:numtide/treefmt-nix/27b3b12a8e6375f28ebe122f07d230ca5459bbfa";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs = inputs @ {
@@ -25,18 +29,9 @@
       nix = "${inputs.harbor-meta}/nix/treefmt/nix.nix";
       toml = "${inputs.harbor-meta}/nix/treefmt/toml.nix";
     };
-    # Standalone, reuse the treefmt-nix pin from the raw harbor-meta source
-    # instead of adding its transitive inputs to this flake's graph.
-    treefmt-nix =
-      inputs.treefmt-nix or (let
-        lock = builtins.fromJSON (builtins.readFile "${inputs.harbor-meta}/flake.lock");
-        pin = lock.nodes.${lock.nodes.${lock.root}.inputs.treefmt-nix}.locked;
-      in {
-        lib = import (builtins.fetchTree pin).outPath;
-      });
     treefmt =
       forAllSystems ({pkgs, ...}:
-        treefmt-nix.lib.evalModule pkgs (import ./nix/treefmt.nix {inherit harbor-meta;}));
+        inputs.treefmt-nix.lib.evalModule pkgs (import ./nix/treefmt.nix {inherit harbor-meta;}));
   in {
     lib = import ./lib;
 
