@@ -1,5 +1,22 @@
 {
   "nodes": {
+    "harbor-meta": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1794482389,
+        "narHash": "sha256-Q1ZVqkgyUfXX5ykYqMfUBbXQuryRqH3z79wFTQgt3F0=",
+        "owner": "caniko",
+        "repo": "harbor-meta",
+        "rev": "b494b56e8174557b27956108d3ed7dd0e6425d0b",
+        "type": "github"
+      },
+      "original": {
+        "owner": "caniko",
+        "repo": "harbor-meta",
+        "rev": "b494b56e8174557b27956108d3ed7dd0e6425d0b",
+        "type": "github"
+      }
+    },
     "nixpkgs": {
       "locked": {
         "lastModified": 1791487292,
@@ -18,6 +35,7 @@
     },
     "root": {
       "inputs": {
+        "harbor-meta": "harbor-meta",
         "nixpkgs": "nixpkgs"
       }
     }

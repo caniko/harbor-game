@@ -1,9 +1,15 @@
 {
   description = "Generic NixOS gaming plumbing: Steam, GameMode, admission, ntsync, DXVK/vkBasalt renderers";
 
-  inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+  inputs = {
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    harbor-meta = {
+      url = "github:caniko/harbor-meta/b494b56e8174557b27956108d3ed7dd0e6425d0b";
+      flake = false;
+    };
+  };
 
-  outputs = {
+  outputs = inputs @ {
     self,
     nixpkgs,
     ...
@@ -15,6 +21,22 @@
           inherit system;
           pkgs = import nixpkgs {inherit system;};
         });
+    harbor-meta.treefmtModules = {
+      nix = "${inputs.harbor-meta}/nix/treefmt/nix.nix";
+      toml = "${inputs.harbor-meta}/nix/treefmt/toml.nix";
+    };
+    # Standalone, reuse the treefmt-nix pin from the raw harbor-meta source
+    # instead of adding its transitive inputs to this flake's graph.
+    treefmt-nix =
+      inputs.treefmt-nix or (let
+        lock = builtins.fromJSON (builtins.readFile "${inputs.harbor-meta}/flake.lock");
+        pin = lock.nodes.${lock.nodes.${lock.root}.inputs.treefmt-nix}.locked;
+      in {
+        lib = import (builtins.fetchTree pin).outPath;
+      });
+    treefmt =
+      forAllSystems ({pkgs, ...}:
+        treefmt-nix.lib.evalModule pkgs (import ./nix/treefmt.nix {inherit harbor-meta;}));
   in {
     lib = import ./lib;
 
@@ -32,8 +54,11 @@
       system,
       ...
     }:
-      import ./checks {inherit pkgs system self nixpkgs;});
+      import ./checks {inherit pkgs system self nixpkgs;}
+      // {
+        formatting = treefmt.${system}.config.build.check self;
+      });
 
-    formatter = forAllSystems ({pkgs, ...}: pkgs.alejandra);
+    formatter = builtins.mapAttrs (_: eval: eval.config.build.wrapper) treefmt;
   };
 }
