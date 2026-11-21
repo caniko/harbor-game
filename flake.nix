@@ -4,7 +4,7 @@
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     harbor-meta = {
-      url = "github:caniko/harbor-meta/b494b56e8174557b27956108d3ed7dd0e6425d0b";
+      url = "github:caniko/harbor-meta/0d98f0972a2172663c33ef2cf4096c68cac1a8f0";
       flake = false;
     };
     treefmt-nix = {
@@ -28,6 +28,9 @@
     harbor-meta.treefmtModules = {
       nix = "${inputs.harbor-meta}/nix/treefmt/nix.nix";
       toml = "${inputs.harbor-meta}/nix/treefmt/toml.nix";
+      markdown = "${inputs.harbor-meta}/nix/treefmt/markdown.nix";
+      shell = "${inputs.harbor-meta}/nix/treefmt/shell.nix";
+      svg = "${inputs.harbor-meta}/nix/treefmt/svg.nix";
     };
     treefmt =
       forAllSystems ({pkgs, ...}:
